@@ -19,6 +19,14 @@ const auth = async (req, res, next) => {
 
     const token = authHeader.replace('Bearer ', '');
 
+    // Check if JWT_SECRET is configured
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Server configuration error: JWT_SECRET is not set.' 
+      });
+    }
+
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -71,6 +79,12 @@ const optionalAuth = async (req, res, next) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
+    
+    // Check if JWT_SECRET is configured
+    if (!process.env.JWT_SECRET) {
+      return next();
+    }
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
 

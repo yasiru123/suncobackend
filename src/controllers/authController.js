@@ -5,6 +5,9 @@ const User = require('../models/User');
  * Generate JWT access token
  */
 const generateAccessToken = (userId) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured. Please set it in your environment variables.');
+  }
   return jwt.sign(
     { userId },
     process.env.JWT_SECRET,
@@ -16,9 +19,13 @@ const generateAccessToken = (userId) => {
  * Generate JWT refresh token
  */
 const generateRefreshToken = (userId) => {
+  const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not configured. Please set it in your environment variables.');
+  }
   return jwt.sign(
     { userId },
-    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+    secret,
     { expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d' }
   );
 };
@@ -157,10 +164,15 @@ const refresh = async (req, res) => {
     }
 
     // Verify refresh token
-    const decoded = jwt.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
-    );
+    const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error: JWT_SECRET is not set.'
+      });
+    }
+    
+    const decoded = jwt.verify(refreshToken, secret);
 
     // Generate new access token
     const accessToken = generateAccessToken(decoded.userId);

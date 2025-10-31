@@ -7,6 +7,19 @@ const connectDB = require('./config/database');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
+// Validate required environment variables
+const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:');
+  missingEnvVars.forEach(envVar => {
+    console.error(`   - ${envVar}`);
+  });
+  console.error('\n⚠️  Please set these variables in your Railway environment settings.');
+  process.exit(1);
+}
+
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const readingRoutes = require('./routes/readingRoutes');

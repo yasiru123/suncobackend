@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "generate-secrets": "node scripts/generate-secrets.js"
   },
   "keywords": ["sunscreen", "uvi", "health", "reminder"],
   "author": "",
